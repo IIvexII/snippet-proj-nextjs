@@ -28,7 +28,7 @@ export default function EditableText({ text, setText }) {
       ) : (
         <p
           className="text-gray-500 text-sm cursor-pointer"
-          onClick={(e) => setIsTitleClicked(true)}
+          onClick={() => setIsTitleClicked(true)}
         >
           <abbr title={text} className="no-underline">
             {text.length > 26 ? `${text.slice(0, 26)}...` : text}

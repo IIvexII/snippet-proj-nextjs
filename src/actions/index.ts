@@ -2,13 +2,53 @@
 
 import { db } from "@/db";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 
-export async function editSnippet(id: number, title: string, code: string) {
-  await db.snippet.update({
-    where: { id },
-    data: { title, code },
+export async function editSnippet(
+  _formState: { message: string },
+  formData: FormData
+) {
+  const id = formData.get("id");
+  const title = formData.get("title");
+  const code = formData.get("code");
+
+  // Validate title and code
+  if (typeof id !== "string") {
+    return { message: "Id is required" };
+  }
+
+  // find snippet by id
+  const snippet = await db.snippet.findFirst({
+    where: { id: parseInt(id) },
   });
 
+  if (!snippet) {
+    return { message: "Snippet not found" };
+  }
+
+  if (typeof title !== "string" || title.length < 3) {
+    return { message: "Title must be at least 3 characters" };
+  }
+  if (typeof code !== "string" || code.length < 10) {
+    return {
+      message: "Code must be at least 10 characters",
+    };
+  }
+
+  try {
+    // Update snippet
+    await db.snippet.update({
+      where: { id: snippet.id },
+      data: { title, code },
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { message: error.message };
+    } else {
+      return { message: "Something went wrong while updating snippet" };
+    }
+  }
+  revalidatePath("/");
   redirect(`/snippets/${id}`);
 }
 
@@ -17,23 +57,45 @@ export async function deleteSnippet(id: number) {
     where: { id },
   });
 
+  revalidatePath("/");
   redirect("/");
 }
 
 export async function createSnippet(
-  formState: { message: string },
+  _formState: { message: string },
   formData: FormData
 ) {
-  return { message: "Hello World" };
-  // const title = formData.get("title") as string;
-  // const code = formData.get("code") as string;
+  const title = formData.get("title");
+  const code = formData.get("code");
 
-  // await db.snippet.create({
-  //   data: {
-  //     title,
-  //     code,
-  //   },
-  // });
+  // Validate title and code
+  if (typeof title !== "string" || title.length < 3) {
+    return { message: "Title must be at least 3 characters" };
+  }
+  if (typeof code !== "string" || code.length < 10) {
+    return {
+      message: "Code must be at least 10 characters",
+    };
+  }
 
-  // redirect("/");
+  try {
+    // Create snippet
+    await db.snippet.create({
+      data: {
+        title,
+        code,
+      },
+    });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      return { message: error.message };
+    } else {
+      return { message: "Something went wrong while creating snippet" };
+    }
+  }
+
+  revalidatePath("/");
+  redirect("/");
+
+  return { message: "Successfully created snippet!" };
 }

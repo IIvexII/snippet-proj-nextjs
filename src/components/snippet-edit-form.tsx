@@ -10,6 +10,7 @@ import { Editor, type Monaco } from "@monaco-editor/react";
 
 // actions
 import * as actions from "@/actions";
+import { useFormState } from "react-dom";
 
 /// Interface of SnippetEditForm
 interface SnippetEditFormProps {
@@ -17,15 +18,11 @@ interface SnippetEditFormProps {
 }
 
 export default function SnippetEditForm({ snippet }: SnippetEditFormProps) {
+  const [formState, action] = useFormState(actions.editSnippet, {
+    message: "",
+  });
   const [title, setTitle] = useState(snippet.title);
   const [code, setCode] = useState(snippet.code);
-
-  const editSnippetAction = actions.editSnippet.bind(
-    null,
-    snippet.id,
-    title,
-    code
-  );
 
   const handleCodeChange = (value: string = "") => {
     setCode(value);
@@ -43,9 +40,13 @@ export default function SnippetEditForm({ snippet }: SnippetEditFormProps) {
       <h1 className="text-2xl font-bold text-center mb-4">Edit Snippet</h1>
 
       {/* Editor */}
-      <div className="w-full flex flex-col mt-4">
+      <div className="w-full flex flex-col mt-4 border border-gray-300 rounded-md`">
         <div className="bg-gray-200 rounded-t-md flex justify-between items-center px-4 py-2">
-          <form action={editSnippetAction}>
+          <form action={action}>
+            <input type="hidden" name="id" value={snippet.id} />
+            <input type="hidden" name="title" value={title} />
+            <input type="hidden" name="code" value={code} />
+
             <button
               type="submit"
               className="text-gray-500 hover:text-white text-xs bg-white hover:bg-green-400 rounded-full px-3 py-1 cursor-pointer transition-all duration-300"
@@ -78,6 +79,12 @@ export default function SnippetEditForm({ snippet }: SnippetEditFormProps) {
           beforeMount={handleEditorDidMount}
         />
       </div>
+
+      {formState.message && (
+        <div className="bg-red-500 text-white p-4 rounded-md mt-4">
+          {formState.message}
+        </div>
+      )}
     </div>
   );
 }

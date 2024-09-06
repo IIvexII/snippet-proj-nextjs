@@ -18,7 +18,7 @@ export default async function SnippetEditPage({ params }: SnippetEditPageProp) {
   }
 
   return (
-    <div className="max-w-lg mx-auto">
+    <div className="max-w-lg mx-auto h-screen flex flex-col justify-center">
       <SnippetEditForm snippet={snippet} />
     </div>
   );
