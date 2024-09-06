@@ -1,6 +1,7 @@
 import { db } from "@/db";
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import * as actions from "@/actions";
 
 interface SnippetPageProps {
   params: {
@@ -19,24 +20,28 @@ export default async function SnippetPage({ params }: SnippetPageProps) {
     return notFound();
   }
 
+  const deleteSnippetAction = actions.deleteSnippet.bind(null, snippet.id);
+
   return (
     <div className="max-w-2xl max-md:max-w-md mx-auto flex flex-col justify-center h-screen gap-2">
       <h1 className="text-4xl font-bold mb-12 text-center">Snippet</h1>
       <div className="flex justify-between items-center">
         <h1 className="text-xl font-bold mb-4">{snippet.title}</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-row items-center gap-2">
           <Link
             href={`/snippets/${snippet.id}/edit`}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md"
           >
             Edit
           </Link>
-          <Link
-            href={`/snippets/${snippet.id}/delete`}
-            className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
-          >
-            Delete
-          </Link>
+          <form action={deleteSnippetAction}>
+            <button
+              type="submit"
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md"
+            >
+              Delete
+            </button>
+          </form>
         </div>
       </div>
       {/* show code block with line numbers */}
